@@ -9,8 +9,10 @@ app.secret_key = 'super-secret-key'  # Replace with env var in production
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+DATABASE = os.path.join(os.getcwd(), 'database.db')
+
 def get_db():
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -36,6 +38,11 @@ def init_db():
         )
     ''')
     conn.commit()
+    conn.close()
+
+@app.before_first_request
+def initialize():
+    init_db()
 
 @app.route('/')
 def index():
@@ -143,5 +150,4 @@ def delete_post(post_id):
     return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True)
