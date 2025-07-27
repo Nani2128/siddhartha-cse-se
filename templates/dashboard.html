@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SITS CSE(SE) Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+        h2 {
+            color: #2c3e50;
+        }
+        .logout {
+            float: right;
+            margin-top: -40px;
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav button {
+            flex: 1 1 30%;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .nav button:hover {
+            background: #0056b3;
+            transform: scale(1.03);
+        }
+        .nav button.active {
+            background: #28a745 !important;
+        }
+        .form-box {
+            display: {% if role == 'admin' %}block{% else %}none{% endif %};
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px #ccc;
+            margin-bottom: 20px;
+        }
+        .form-box input[type="text"],
+        .form-box input[type="file"],
+        .form-box select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-box button {
+            margin-top: 10px;
+            padding: 10px;
+            background: #28a745;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            width: 100%;
+            font-weight: bold;
+        }
+        .post {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px #bbb;
+        }
+        .post img, .post video {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 6px;
+        }
+        .pdf-link {
+            background: #e74c3c;
+            color: white;
+            padding: 6px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #777;
+            margin-top: 6px;
+        }
+        @media (max-width: 768px) {
+            .nav button {
+                flex: 1 1 45%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome {{ username }} ({{ role }})</h2>
+        <a class="logout" href="{{ url_for('logout') }}">Logout</a>
+
+        <!-- Navigation Buttons -->
+        <div class="nav">
+            <button class="filter-btn active" onclick="filterPosts('all', this)">📋 Show All</button>
+            <button class="filter-btn" onclick="filterPosts('syllabus', this)">📚 Syllabus / Notes</button>
+            <button class="filter-btn" onclick="filterPosts('assignments', this)">📝 Assignments</button>
+            <button class="filter-btn" onclick="filterPosts('exams', this)">🧪 Exams</button>
+            <button class="filter-btn" onclick="filterPosts('gallery', this)">📸 Gallery</button>
+            <button class="filter-btn" onclick="filterPosts('downloads', this)">📥 Downloads</button>
+            <button class="filter-btn" onclick="filterPosts('events', this)">📅 Events</button>
+        </div>
+
+        <!-- Admin Upload Form -->
+        <div class="form-box">
+            <h3>Create a Post</h3>
+            <form method="POST" enctype="multipart/form-data">
+                <input type="text" name="content" placeholder="Write something..." required><br><br>
+                <input type="file" name="file"><br><br>
+                <select name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="syllabus">📚 Syllabus / Notes</option>
+                    <option value="assignments">📝 Assignments</option>
+                    <option value="exams">🧪 Exams</option>
+                    <option value="gallery">📸 Gallery</option>
+                    <option value="downloads">📥 Downloads</option>
+                    <option value="events">📅 Events</option>
+                </select><br><br>
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+
+        <!-- Display Posts -->
+        <!-- Display Posts -->
+{% for post in posts %}
+<div class="post" data-category="{{ post[6] }}">
+    <h4>@{{ post[1] }} - {{ post[6]|capitalize }}</h4>
+    <p>{{ post[2] }}</p>
+
+    {% if post[4] in ['jpg', 'jpeg', 'png', 'gif'] %}
+        <img src="{{ '/' + post[3] }}" alt="Image Post">
+    {% elif post[4] == 'mp4' %}
+        <video controls>
+            <source src="{{ '/' + post[3] }}" type="video/mp4">
+        </video>
+    {% elif post[4] == 'pdf' %}
+        <a class="pdf-link" href="{{ '/' + post[3] }}" target="_blank">📄 View PDF</a>
+    {% endif %}
+
+    <div class="timestamp">{{ post[5] }}</div>
+
+    {% if role == 'admin' %}
+    <form action="{{ url_for('delete_post', post_id=post[0]) }}" method="post" style="margin-top: 10px;">
+        <button type="submit" onclick="return confirm('Delete this post?')" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer;">🗑️ Delete</button>
+    </form>
+    {% endif %}
+</div>
+{% endfor %}
+    </div>
+
+    <script>
+        function filterPosts(category, button) {
+            const posts = document.querySelectorAll('.post');
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            posts.forEach(post => {
+                if (category === 'all' || post.dataset.category === category) {
+                    post.style.display = 'block';
+                } else {
+                    post.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
