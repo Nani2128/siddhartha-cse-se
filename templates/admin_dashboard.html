@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - SITS CSE(SE)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: #343a40;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            flex-wrap: wrap;
+        }
+
+        .navbar div, .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 5px 10px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        .post {
+            border-bottom: 1px solid #ccc;
+            padding: 15px 0;
+        }
+
+        .post h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .post p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .actions form {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        /* New button style for Profiles */
+        .profiles-button {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+        .profiles-button:hover {
+            background-color: #138496;
+        }
+
+        .footer {
+            text-align: center;
+            margin: 30px 0;
+            font-size: 14px;
+            color: #777;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                flex-direction: column;
+                text-align: center;
+            }
+            .navbar div, .navbar a {
+                margin: 8px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div><strong>Admin Panel - SITS CSE(SE)</strong></div>
+        <div>
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('upload_post') }}">Upload Post</a>
+            <!-- Removed Student Profiles link here -->
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Profiles button -->
+        <button class="profiles-button" onclick="location.href='{{ url_for('student_profiles') }}'">Profiles</button>
+
+        <h1>📚 Posts by Category</h1>
+
+        {% for category, posts in category_posts.items() %}
+            <h2 style="color:#0056b3;">📂 {{ category }}</h2>
+            {% for post in posts %}
+                <div class="post">
+                    <h3>{{ post[2] }}</h3>
+                    <p>{{ post[3] }}</p>
+
+                    {% if post[4] %}
+                        <p><a href="{{ '/' + post[4] }}" target="_blank">📁 View File</a></p>
+                    {% endif %}
+
+                    {% if post[7] == 0 %}
+                        <p class="status" style="color: orange;">⏳ Pending</p>
+                        <div class="actions">
+                            <form action="{{ url_for('approve_post', post_id=post[0]) }}" method="post">
+                                <button type="submit" style="background-color: #28a745;">✅ Approve</button>
+                            </form>
+                            <form action="{{ url_for('reject_post', post_id=post[0]) }}" method="post">
+                                <button type="submit" style="background-color: #dc3545;">❌ Reject</button>
+                            </form>
+                        </div>
+                    {% elif post[7] == -1 %}
+                        <p class="status" style="color: red;">⛔ Rejected</p>
+                    {% else %}
+                        <p class="status" style="color: green;">✅ Approved</p>
+                    {% endif %}
+
+                    <form action="{{ url_for('delete_post', post_id=post[0]) }}" method="post" onsubmit="return confirm('Delete this post?');">
+                        <button type="submit" style="background-color: #6c757d;">🗑️ Delete</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <div class="footer">
+        &copy; {{ current_year }} Siddhartha Institute of Science & Technology - CSE(SE)
+    </div>
+</body>
+</html>

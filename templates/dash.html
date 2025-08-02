@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SITS CSE(SE) Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* ... your CSS styles (unchanged) ... */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-actions">
+            <h2>Welcome {{ username }} ({{ role }})</h2>
+            <div>
+                <a class="profile" href="{{ url_for('profile') }}">👤 Profile</a>
+                <a class="logout" href="{{ url_for('logout') }}">Logout</a>
+            </div>
+        </div>
+
+        <!-- Category Filter Buttons -->
+        <div class="category-buttons">
+            <a href="{{ url_for('dashboard', category='syllabus') }}">
+                <button class="{% if selected_category == 'syllabus' %}active{% endif %}">📚 Syllabus / Notes</button>
+            </a>
+            <a href="{{ url_for('dashboard', category='assignments') }}">
+                <button class="{% if selected_category == 'assignments' %}active{% endif %}">📝 Assignments</button>
+            </a>
+            <a href="{{ url_for('dashboard', category='exams') }}">
+                <button class="{% if selected_category == 'exams' %}active{% endif %}">🧪 Exams</button>
+            </a>
+            <a href="{{ url_for('dashboard', category='gallery') }}">
+                <button class="{% if selected_category == 'gallery' %}active{% endif %}">📸 Gallery</button>
+            </a>
+            <a href="{{ url_for('dashboard', category='downloads') }}">
+                <button class="{% if selected_category == 'downloads' %}active{% endif %}">📥 Downloads</button>
+            </a>
+            <a href="{{ url_for('dashboard', category='events') }}">
+                <button class="{% if selected_category == 'events' %}active{% endif %}">📅 Events</button>
+            </a>
+            <a href="{{ url_for('dashboard') }}">
+                <button class="{% if not selected_category %}active{% endif %}">🔁 Show All</button>
+            </a>
+        </div>
+
+        <!-- Admin Post Form -->
+        <div class="form-box">
+            <h3>Create a Post</h3>
+            <form method="POST" enctype="multipart/form-data">
+                <input type="text" name="content" placeholder="Write something..." required>
+                <input type="file" name="file">
+                <select name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="syllabus">📚 Syllabus / Notes</option>
+                    <option value="assignments">📝 Assignments</option>
+                    <option value="exams">🧪 Exams</option>
+                    <option value="gallery">📸 Gallery</option>
+                    <option value="downloads">📥 Downloads</option>
+                    <option value="events">📅 Events</option>
+                </select>
+                <button type="submit">Upload</button>
+            </form>
+        </div>
+
+        <!-- Posts -->
+        {% if selected_category %}
+            {% for post in posts %}
+                <div class="post">
+                    <h4>@{{ post[1] }} - {{ post[6]|capitalize }}</h4>
+                    <p>{{ post[2] }}</p>
+
+                    {% if post[4] in ['jpg', 'jpeg', 'png', 'gif'] %}
+                        <img src="{{ '/' + post[3] }}" alt="Image Post">
+                    {% elif post[4] == 'mp4' %}
+                        <video controls>
+                            <source src="{{ '/' + post[3] }}" type="video/mp4">
+                        </video>
+                    {% elif post[4] == 'pdf' %}
+                        <a class="pdf-link" href="{{ '/' + post[3] }}" target="_blank">📄 View PDF</a>
+                    {% endif %}
+
+                    <div class="timestamp">{{ post[5] }}</div>
+
+                    <div class="like-comment">
+                        <form action="{{ url_for('like_post', post_id=post[0]) }}" method="get">
+                            <button type="submit">👍 Like</button>
+                        </form>
+                        <form action="{{ url_for('comment_post', post_id=post[0]) }}" method="post">
+                            <input type="text" name="comment" placeholder="Write a comment...">
+                            <button type="submit">💬</button>
+                        </form>
+                    </div>
+
+                    {% if role == 'admin' %}
+                        {% if post[7] == 0 %}
+                            <div class="status-badge pending">⏳ Pending Approval</div>
+                            <form action="{{ url_for('approve_post', post_id=post[0]) }}" method="post" style="display:inline;">
+                                <button class="delete-btn" style="background-color: #28a745;">✅ Approve</button>
+                            </form>
+                            <form action="{{ url_for('reject_post', post_id=post[0]) }}" method="post" style="display:inline;">
+                                <button class="delete-btn" style="background-color: #ffc107; color: black;">❌ Reject</button>
+                            </form>
+                        {% elif post[7] == -1 %}
+                            <div class="status-badge rejected">⛔ Rejected</div>
+                        {% else %}
+                            <div class="status-badge approved">✅ Approved</div>
+                        {% endif %}
+
+                        <form action="{{ url_for('delete_post', post_id=post[0]) }}" method="post">
+                            <button class="delete-btn" onclick="return confirm('Delete this post?')">🗑️ Delete</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align:center; color: #888;">📂 Please select a category to view posts.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

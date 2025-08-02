@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance - SITS CSE(SE)</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f4f6f9; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        th { background-color: #007bff; color: white; }
+        td.present { background-color: #d4edda; color: green; }
+        td.absent { background-color: #f8d7da; color: red; }
+        .form-container { margin-top: 20px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px #ccc; }
+        button { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h2>Attendance Panel</h2>
+
+    {% if role == 'admin' %}
+    <div class="form-container">
+        <h3>Mark Attendance</h3>
+        <form method="POST">
+            <label for="date">Date:</label><br>
+            <input type="date" name="date" required><br><br>
+            <label for="username">Student Roll No:</label><br>
+            <input type="text" name="username" required><br><br>
+            <label>Status:</label><br>
+            <select name="status" required>
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+            </select><br><br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <h3>All Attendance Records</h3>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Roll No</th>
+            <th>Status</th>
+        </tr>
+        {% for record in attendance %}
+        <tr>
+            <td>{{ record['date'] }}</td>
+            <td>{{ record['username'] }}</td>
+            <td class="{{ 'present' if record['status'] == 'Present' else 'absent' }}">{{ record['status'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

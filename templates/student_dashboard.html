@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Dashboard - SITS CSE(SE)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+    .navbar {
+      background-color: #007bff;
+      padding: 15px 20px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin: 0 10px;
+      font-weight: bold;
+    }
+    .main-content {
+      padding: 40px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div><strong>Welcome {{ username }} (Student)</strong></div>
+    <div class="nav-links">
+      <a href="{{ url_for('dashboard') }}">🏠 Dashboard</a>
+      <a href="{{ url_for('profile') }}">👤 Profile</a>
+      <a href="{{ url_for('logout') }}">🚪 Logout</a>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <h3>Select an option from the menu above</h3>
+  </div>
+</body>
+</html>
